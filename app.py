@@ -6,7 +6,7 @@ import seaborn as sns
 import io
 
 # ==========================================
-# ARCHITECTURAL POO ENGINE (CLASE EXTRACCION)
+# ARCHITECTURAL POO ENGINE
 # ==========================================
 class DataAnalyzer:
     def __init__(self, dataframe):
@@ -120,7 +120,7 @@ if seccion == "Modulo 1: Home":
         st.header("Objetivo del Analisis")
         st.write("""
         El proposito de este producto analitico es examinar y diagnosticar la perdida de clientes 
-        (Churn) mediante la identificacion de patrones criticos en el comportamiento del consumidor. 
+        y desercion mediante la identificacion de patrones criticos en el comportamiento del consumidor. 
         A traves de tecnicas avanzadas de limpieza, transformacion y visualizacion de datos, la plataforma 
         descubre las variables demograficas, financieras y de servicio que impactan directamente 
         en la retencion de ingresos dentro del sector de telecomunicaciones.
@@ -145,7 +145,7 @@ if seccion == "Modulo 1: Home":
             st.write(f"**Curso:** Especializacion en Python for Analytics")
             st.write(f"**Edicion:** Clase 57")
             st.write(f"**Anio de Desarrollo:** 2026")
-            st.write(f"**Estado del Dashboard:** Desplegado (Stable)")
+            st.write(f"**Estado del Dashboard:** Desplegado")
 
     st.divider()
     st.header("Infraestructura Tecnologica del Sistema")
@@ -185,7 +185,7 @@ elif seccion == "Modulo 2: Carga de Datos":
             st.toast("Dataset cargado y procesado con exito")
 
         df = st.session_state.df_churn
-        st.success("?Estructura de datos lista para el analisis!")
+        st.success("Estructura de datos lista para el analisis")
 
         st.subheader("Indicadores Estructurales del Dataset")
         m_col1, m_col2, m_col3, m_col4 = st.columns(4)
@@ -220,7 +220,7 @@ elif seccion == "Modulo 2: Carga de Datos":
         with col_tipo2:
             st.write("##### Validacion de Valores Nulos Detectados")
             conteo_nulos = df.isnull().sum().reset_index()
-            conteo_nulos.columns = ["Nombre de Variable", "Valores Nulos (NaN)"]
+            conteo_nulos.columns = ["Nombre de Variable", "Valores Nulos"]
             variables_criticas = conteo_nulos[conteo_nulos["Nombre de Variable"].isin(["tenure", "MonthlyCharges", "TotalCharges"])]
             st.dataframe(variables_criticas, use_container_width=True, hide_index=True)
 
@@ -349,7 +349,7 @@ elif seccion == "Modulo 3: Analisis Exploratorio (EDA)":
             st.subheader("Analisis Estadistico de Cargos y Permanencia")
             
             metric_fin = st.radio(
-                "Seleccione la metrica financiera cuantitativa a evaluar (Histograma de Densidad):",
+                "Seleccione la metrica financiera cuantitativa a evaluar:",
                 ["MonthlyCharges", "TotalCharges", "tenure"],
                 horizontal=True
             )
@@ -361,12 +361,12 @@ elif seccion == "Modulo 3: Analisis Exploratorio (EDA)":
                 marginal="box",
                 barmode="overlay",
                 color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
-                labels={"MonthlyCharges": "Cargos Mensuales ($)", "TotalCharges": "Cargos Totales ($)", "tenure": "Meses de Permanencia (Tenure)"}
+                labels={"MonthlyCharges": "Cargos Mensuales ($)", "TotalCharges": "Cargos Totales ($)", "tenure": "Meses de Permanencia"}
             )
             fig_hist.update_layout(height=450, yaxis_title="Densidad de Observaciones")
             st.plotly_chart(fig_hist, use_container_width=True)
             
-            st.write("##### Resumen Estadistico Descriptivo Matriz Financiera (Pandas describe)")
+            st.write("##### Resumen Estadistico Descriptivo Matriz Financiera")
             st.dataframe(
                 df[["tenure", "MonthlyCharges", "TotalCharges"]].describe().T, 
                 use_container_width=True
@@ -376,7 +376,7 @@ elif seccion == "Modulo 3: Analisis Exploratorio (EDA)":
 # MODULO 4: GESTION DE REPORTES (POO)
 # ==========================================
 elif seccion == "Modulo 4: Gestion de Reportes (POO)":
-    st.title("Suite Institucional: Reporte de Auditoria y Control Estrategico (EDA Minimo 10 Items)")
+    st.title("Suite Institucional: Reporte de Auditoria y Control Estrategico")
     st.divider()
 
     if st.session_state.df_churn is None:
@@ -387,17 +387,16 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
         clasificacion = procesador.clasificar_variables_personalizada()
 
         t_estructura, t_univariado, t_bivariado, t_dinamico_conclusiones = st.tabs([
-            "Items 1-4: Estructura y Tipos", 
-            "Items 5-6: Analisis Univariado", 
-            "Items 7-8: Cruces Bivariados", 
-            "Items 9-10: Suite Dinamica & Cierre"
+            "Estructura y Tipos", 
+            "Analisis Univariado", 
+            "Cruces Bivariados", 
+            "Suite Dinamica y Cierre"
         ])
 
-        # --- TAB 1: ESTRUCTURA INICIAL Y VALIDACIONES BASICAS ---
         with t_estructura:
             st.header("Seccion A: Arquitectura y Validacion Estructural de la Matriz")
             
-            st.subheader("Item 1: Informacion General del Dataset (.info())")
+            st.subheader("Item 1: Informacion General del Dataset")
             col_i1, col_i2 = st.columns([2, 1])
             with col_i1:
                 texto_info = procesador.obtener_info_clon()
@@ -410,7 +409,7 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            st.subheader("Item 2: Clasificacion Estricta de Variables (POO Mapping)")
+            st.subheader("Item 2: Clasificacion Estricta de Variables")
             st.write("Resultados computados mediante el motor iterativo de la clase `DataAnalyzer`:")
             col_cl1, col_cl2 = st.columns(2)
             with col_cl1:
@@ -428,13 +427,13 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
             st.dataframe(df_descriptivos, use_container_width=True)
             
             st.markdown("""
-            * **Interpretacion de Tendencia Central:** La permanencia media (`tenure`) se situa en **32.3 meses**, muy cercana a su mediana (50%) de **29.0 meses**. Sin embargo, la **Moda** es **1 mes**, indicando una concentracion masiva de clientes nuevos con alta probabilidad de desercion temprana.
+            * **Interpretacion de Tendencia Central:** La permanencia media (`tenure`) se situa en **32.3 meses**, muy cercana a su mediana de **29.0 meses**. Sin embargo, la **Moda** es **1 mes**, indicando una concentracion masiva de clientes nuevos con alta probabilidad de desercion temprana.
             * **Interpretacion de Dispersion:** Los cargos mensuales (`MonthlyCharges`) presentan una desviacion estandar de **$30.09** sobre una media de **$64.76**, exponiendo una oferta comercial altamente diversificada en tarifas.
             """)
 
             st.divider()
 
-            st.subheader("Item 4: Diagnostico de Integridad y Valores Faltantes (NaN)")
+            st.subheader("Item 4: Diagnostico de Integridad y Valores Faltantes")
             conteo_nulos = df_activo.isnull().sum().reset_index()
             conteo_nulos.columns = ["Atributo", "Cantidad de Valores Nulos Detectados"]
             
@@ -444,15 +443,14 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
             with col_n2:
                 st.write("**Discusion Tecnica sobre la Calidad del Dato:**")
                 st.write("""
-                La columna `TotalCharges` presentaba originalmente 11 registros con espacios vacios debido a clientes con permanencia cero (`tenure=0`). 
-                Durante la fase de ingesta (Modulo 2), se aplico una coercion forzada transmutandolos a `0.0`. Gracias a esta estrategia preventiva, la matriz arroja un **0.0% de registros nulos**, garantizando la convergencia aritmetica del codigo.
+                La columna `TotalCharges` presentaba originalmente 11 registros con espacios vacios debido a clientes con permanencia cero. 
+                Durante la fase de ingesta en el Modulo 2, se aplico una coercion forzada transmutandolos a `0.0`. Gracias a esta estrategia preventiva, la matriz arroja un **0.0% de registros nulos**, garantizando la convergencia aritmetica del codigo.
                 """)
 
-        # --- TAB 2: ANALISIS UNIVARIADO (DISTRIBUCIONES INDEPENDIENTES) ---
         with t_univariado:
-            st.header("Seccion B: Comportamiento Individual de Variables (Univariado)")
+            st.header("Seccion B: Comportamiento Individual de Variables")
             
-            st.subheader("Item 5: Distribucion de Variables Numericas (Histogramas & Densidad)")
+            st.subheader("Item 5: Distribucion de Variables Numericas")
             sel_num = st.selectbox("Seleccione la variable cuantitativa a graficar:", clasificacion["Numerica"])
             
             col_h1, col_h2 = st.columns([2, 1])
@@ -470,7 +468,7 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            st.subheader("Item 6: Analisis de Variables Categoricas (Frecuencias Absolutas)")
+            st.subheader("Item 6: Analisis de Variables Categoricas")
             sel_cat = st.selectbox("Seleccione la variable cualitativa para analisis de proporciones:", ["Contract", "InternetService", "PaymentMethod", "PaperlessBilling"])
             
             col_b1, col_b2 = st.columns([2, 1])
@@ -484,11 +482,10 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
                 df_prop["Proporcion Relativa"] = df_prop["Proporcion Relativa"].map(lambda x: f"{x*100:.2f}%")
                 st.dataframe(df_prop, use_container_width=True, hide_index=True)
 
-        # --- TAB 3: CRUCES BIVARIADOS CONTRA LA VARIABLE OBJETIVO (CHURN) ---
         with t_bivariado:
-            st.header("Seccion C: Analisis de Relaciones Dinamicas (Cruces Bivariados)")
+            st.header("Seccion C: Analisis de Relaciones Dinamicas")
             
-            st.subheader("Item 7: Variacion Cuantitativa vs Abandono (Numerico vs Categorico)")
+            st.subheader("Item 7: Variacion Cuantitativa vs Abandono")
             sel_biv_num = st.radio("Elija la metrica cuantitativa para contrastar la fuga:", clasificacion["Numerica"], horizontal=True)
             
             col_bv1, col_bv2 = st.columns([2, 1])
@@ -498,7 +495,7 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
             with col_bv2:
                 st.write("**Evidencia Estadistica:**")
                 if sel_biv_num == "MonthlyCharges":
-                    st.write("El diagrama de caja demuestra que los clientes que abandonan la compa?ia (`Churn = Yes`) poseen una mediana de cargos mensuales sustancialmente mas elevada (~$80) en comparacion con los clientes retenidos (~$65). Los precios elevados aceleran la decision de fuga.")
+                    st.write("El diagrama de caja demuestra que los clientes que abandonan la compa?ia poseen una mediana de cargos mensuales sustancialmente mas elevada (~$80) en comparacion con los clientes retenidos (~$65). Los precios elevados aceleran la decision de fuga.")
                 elif sel_biv_num == "tenure":
                     st.write("La caja de desercion se concentra fuertemente por debajo de los 15 meses. Esto comprueba que la ventana de riesgo comercial critico se ubica en el primer a?o de relacion con el usuario.")
                 else:
@@ -506,7 +503,7 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            st.subheader("Item 8: Analisis Bivariado Estructural (Categorico vs Categorico)")
+            st.subheader("Item 8: Analisis Bivariado Estructural")
             sel_biv_cat = st.selectbox("Seleccione el atributo operativo para evaluar con Churn:", ["Contract", "InternetService", "PaymentMethod"])
             
             col_bc1, col_bc2 = st.columns([2, 1])
@@ -515,9 +512,8 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
                 st.pyplot(fig_bv_cc)
             with col_bc2:
                 st.write("**Analisis de Vulnerabilidad Comercial:**")
-                st.write(f"Al cruzar `{sel_biv_cat}` con la tasa de perdida, queda demostrado visualmente que ciertos atributos actuan como detonantes de insatisfaccion o comodidad contractual. Los contratos mensuales (`Month-to-month`) y los pagos por transferencia fisica electronica lideran el volumen absoluto de abandonos.")
+                st.write(f"Al cruzar `{sel_biv_cat}` con la tasa de perdida, queda demostrado visualmente que ciertos atributos actuan como detonantes de insatisfaccion o comodidad contractual. Los contratos mensuales y los pagos por transferencia fisica electronica lideran el volumen absoluto de abandonos.")
 
-        # --- TAB 4: FILTROS MULTIPLES Y CONCLUSIONES DE NEGOCIO ---
         with t_dinamico_conclusiones:
             st.header("Seccion D: Herramienta Parametrica y Cierre de Auditoria")
             
@@ -530,7 +526,7 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
             with col_p2:
                 lista_metodos = st.multiselect("Metodos de Pago a incluir:", options=df_activo["PaymentMethod"].unique(), default=df_activo["PaymentMethod"].unique())
             
-            activar_filtro_antiguedad = st.checkbox("Restringir analisis a clientes de alto riesgo (Permanencia menor a 12 meses)")
+            activar_filtro_antiguedad = st.checkbox("Restringir analisis a clientes de alto riesgo con permanencia menor a 12 meses")
             
             df_filtrado = df_activo[(df_activo["Contract"].isin(lista_contratos)) & (df_activo["PaymentMethod"].isin(lista_metodos))]
             if activar_filtro_antiguedad:
@@ -541,7 +537,7 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            st.subheader("Item 10: Sintesis Visual de Hallazgos Clave (EDA Summary)")
+            st.subheader("Item 10: Sintesis Visual de Hallazgos Clave")
             col_hcl1, col_hcl2 = st.columns([2, 1])
             with col_hcl1:
                 fig_scat, ax_scat = plt.subplots(figsize=(6, 3.8))
@@ -553,8 +549,7 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
                 st.write("**Insights Criticos del Ecosistema:**")
                 st.warning("""
                 El mapa de dispersion evidencia un cuadrante de alto peligro en la zona superior izquierda. 
-                Los clientes con cargos mensuales superiores a los **$70** que se encuentran en su primer a?o contractual (`tenure < 12`) 
-                poseen la mayor densidad de esferas de desercion. Ahi radica el problema central del negocio.
+                Los clientes con cargos mensuales superiores a los **$70** que se encuentran en su primer a?o contractual poseen la mayor densidad de esferas de desercion. Ahi radica el problema central del negocio.
                 """)
 
             st.divider()
@@ -562,7 +557,7 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
             st.header("Conclusiones Finales: Lineamientos Estrategicos para la Toma de Decisiones")
             with st.container(border=True):
                 st.markdown("""
-                1. **Vulnerabilidad Contractual Aguda:** El contrato de ciclo mensual (`Month-to-month`) representa la mayor pasarela de fuga de la compa?ia. Las decisiones de retencion deben orientarse a incentivar activamente la migracion hacia esquemas anuales mediante bonificaciones en los meses de entrada.
+                1. **Vulnerabilidad Contractual Aguda:** El contrato de ciclo mensual representa la mayor pasarela de fuga de la compa?ia. Las decisiones de retencion deben orientarse a incentivar activamente la migracion hacia esquemas anuales mediante bonificaciones en los meses de entrada.
                 2. **Factor de Alarma Financiera:** Los clientes que cancelaron sus servicios presentan costos mensuales medianos sustancialmente mas elevados. Es critico reevaluar la estrategia de precios de los paquetes empaquetados, dado que las tarifas altas estan expulsando a los consumidores nuevos.
                 3. **Deficiencia en Infraestructura Tecnologica:** El segmento de usuarios provisto con conectividad de **Fibra Optica** experimenta tasas de abandono anormalmente altas. Esto sugiere la existencia de un problema operativo latente en la calidad de la se?al o insatisfaccion con el ancho de banda profesional ofrecido, requiriendo auditoria tecnica inmediata.
                 4. **Efecto Mitigador del Soporte Tecnico:** El analisis descriptivo confirmo que los clientes que no tienen contratado el servicio de asistencia tecnica o soporte digital se marchan en mayor proporcion. Empaquetar el soporte de manera gratuita durante los primeros 6 meses reducira drasticamente la friccion inicial.
