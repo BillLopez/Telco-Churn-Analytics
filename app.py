@@ -109,6 +109,7 @@ if seccion == "Modulo 1: Home":
     st.divider()
 
     col_img, col_info = st.columns([1, 2])
+    
     with col_img:
         try:
             st.image("logo_lopez.png", use_container_width=True)
@@ -127,6 +128,7 @@ if seccion == "Modulo 1: Home":
         
     st.divider()
     col_det, col_autor = st.columns([2, 1])
+    
     with col_det:
         st.subheader("Estructura del Dataset (TelcoCustomerChurn)")
         st.write("""
@@ -147,11 +149,16 @@ if seccion == "Modulo 1: Home":
 
     st.divider()
     st.header("Infraestructura Tecnologica del Sistema")
+    
     t1, t2, t3, t4 = st.columns(4)
     with t1: st.info("##### Core Engine\nPython 3.x\nf-strings & POO")
     with t2: st.success("##### Data Wrangling\nPandas Framework\nNumPy Arrays")
     with t3: st.warning("##### Data Viz\nMatplotlib\nSeaborn Graphics")
     with t4: st.error("##### Deployment\nStreamlit Architecture\nCloud Infrastructure")
+
+    st.divider()
+    st.markdown("##### Nota de Orientacion")
+    st.caption("Para iniciar el diagnostico, dirijase al menu lateral y seleccione el **Modulo 2: Carga de Datos** para procesar la matriz de informacion inicial.")
 
 # ==========================================
 # MODULO 2: CARGA DE DATOS
@@ -160,11 +167,17 @@ elif seccion == "Modulo 2: Carga de Datos":
     st.title("Ingesta y Preparacion Estructural de Datos")
     st.divider()
     
+    st.write("""
+    Este modulo maneja la carga del archivo plano y aplica las transformaciones iniciales de ingenieria de datos. 
+    Detecta de forma automatica anomalias en la tipificacion de columnas y realiza la coercion de variables string 
+    hacia formatos cuantitativos esenciales para el analisis descriptivo.
+    """)
+
     archivo_subido = st.file_uploader("Seleccione el archivo TelcoCustomerChurn.csv", type=["csv"])
 
     if archivo_subido is not None:
         if st.session_state.df_churn is None:
-            df_crudo = pd.read_csv(archivo_subido)
+            df_crudo = pd.read_csv(archivo_subido, encoding="latin-1")
             df_crudo['TotalCharges'] = pd.to_numeric(df_crudo['TotalCharges'], errors='coerce')
             df_crudo['TotalCharges'] = df_crudo['TotalCharges'].fillna(0.0)
             df_crudo['SeniorCitizen'] = df_crudo['SeniorCitizen'].map({1: 'Yes', 0: 'No'})
@@ -176,6 +189,7 @@ elif seccion == "Modulo 2: Carga de Datos":
 
         st.subheader("Indicadores Estructurales del Dataset")
         m_col1, m_col2, m_col3, m_col4 = st.columns(4)
+        
         total_filas = df.shape[0]
         total_columnas = df.shape[1]
         tasa_fuga = (df['Churn'] == 'Yes').mean() * 100
@@ -187,11 +201,31 @@ elif seccion == "Modulo 2: Carga de Datos":
         m_col4.metric("Facturacion Mensual Total", f"$ {total_ingreso_mensual:,.2f}")
 
         st.divider()
+
         st.subheader("Muestra Analitica de los Datos")
-        num_filas = st.slider("Seleccione el numero de filas a visualizar:", min_value=5, max_value=50, value=5, step=5)
+        num_filas = st.slider("Seleccione el numero de filas a visualizar en la muestra:", min_value=5, max_value=50, value=5, step=5)
         st.dataframe(df.head(num_filas), use_container_width=True, hide_index=True)
+
+        st.divider()
+        st.subheader("Verificacion Tecnica de Variables")
+        
+        col_tipo1, col_tipo2 = st.columns(2)
+        
+        with col_tipo1:
+            st.write("##### Conteo de Variables por Tipo")
+            resumen_tipos = df.dtypes.value_counts().reset_index()
+            resumen_tipos.columns = ["Tipo de Dato en Python", "Cantidad de Columnas"]
+            st.dataframe(resumen_tipos, use_container_width=True, hide_index=True)
+            
+        with col_tipo2:
+            st.write("##### Validacion de Valores Nulos Detectados")
+            conteo_nulos = df.isnull().sum().reset_index()
+            conteo_nulos.columns = ["Nombre de Variable", "Valores Nulos (NaN)"]
+            variables_criticas = conteo_nulos[conteo_nulos["Nombre de Variable"].isin(["tenure", "MonthlyCharges", "TotalCharges"])]
+            st.dataframe(variables_criticas, use_container_width=True, hide_index=True)
+
     else:
-        st.info("Por favor, cargue el archivo del caso de estudio (TelcoCustomerChurn.csv) para activar las herramientas.")
+        st.info("Por favor, cargue el archivo del caso de estudio (TelcoCustomerChurn.csv) para activar las herramientas de diagnostico.")
 
 # ==========================================
 # MODULO 3: ANALISIS EXPLORATORIO (EDA)
@@ -201,42 +235,157 @@ elif seccion == "Modulo 3: Analisis Exploratorio (EDA)":
     st.divider()
 
     if st.session_state.df_churn is None:
-        st.warning("Por favor, vaya primero al Modulo 2 y suba el archivo CSV.")
+        st.warning("Por favor, vaya primero al Modulo 2: Carga de Datos y suba el archivo CSV para activar los analisis visuales.")
+    
     else:
-        import plotly.express as px
         df = st.session_state.df_churn
-        tab1, tab2 = st.tabs(["Fuga General", "Factores de Conectividad"])
-        
-        with tab1:
-            col_g1, col_g2 = st.columns(2)
-            with col_g1:
-                df_c = df["Churn"].value_counts().reset_index()
-                df_c.columns = ["Estado", "Total"]
-                st.plotly_chart(px.pie(df_c, names="Estado", values="Total", hole=0.4), use_container_width=True)
-            with col_g2:
-                df_cont = df.groupby(["Contract", "Churn"]).size().reset_index(name="Clientes")
-                st.plotly_chart(px.bar(df_cont, x="Contract", y="Clientes", color="Churn", barmode="group"), use_container_width=True)
+        import plotly.express as px
 
-        with tab2:
-            df_net = df.groupby(["InternetService", "Churn"]).size().reset_index(name="Total")
-            st.plotly_chart(px.bar(df_net, x="InternetService", y="Total", color="Churn", barmode="group"), use_container_width=True)
+        st.write("""
+        Bienvenido al nucleo analitico del sistema. Explore las diferentes dimensiones operativas y 
+        financieras de la compa?ia para identificar que perfiles de clientes presentan la mayor tasa 
+        de cancelacion de servicios.
+        """)
+
+        tab_general, tab_servicios, tab_financiero = st.tabs([
+            "Distribucion General", 
+            "Analisis de Servicios", 
+            "Comportamiento Financiero"
+        ])
+
+        with tab_general:
+            st.subheader("Perfil de Abandono General y Demografico")
+            
+            col_gen1, col_gen2 = st.columns(2)
+            
+            with col_gen1:
+                st.write("##### Proporcion General de Fuga (Churn)")
+                df_churn_cnt = df["Churn"].value_counts().reset_index()
+                df_churn_cnt.columns = ["Estado", "Total"]
+                
+                fig_pie = px.pie(
+                    df_churn_cnt, 
+                    names="Estado", 
+                    values="Total",
+                    color="Estado",
+                    color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
+                    hole=0.4
+                )
+                fig_pie.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=300)
+                st.plotly_chart(fig_pie, use_container_width=True)
+                
+            with col_gen2:
+                st.write("##### Tasa de Fuga Segun Tipo de Contrato")
+                df_contract = df.groupby(["Contract", "Churn"]).size().reset_index(name="Clientes")
+                
+                fig_contract = px.bar(
+                    df_contract, 
+                    x="Contract", 
+                    y="Clientes", 
+                    color="Churn",
+                    barmode="group",
+                    color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
+                    labels={"Contract": "Tipo de Contrato", "Clientes": "Numero de Clientes"}
+                )
+                fig_contract.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=300)
+                st.plotly_chart(fig_contract, use_container_width=True)
+
+            st.divider()
+            st.write("##### Factores Demograficos Relacionados al Churn")
+            var_demo = st.selectbox("Seleccione una variable demografica para cruzar con Churn:", ["SeniorCitizen", "Partner", "Dependents", "gender"])
+            
+            df_demo_grp = df.groupby([var_demo, "Churn"]).size().reset_index(name="Conteo")
+            fig_demo = px.bar(
+                df_demo_grp,
+                x=var_demo,
+                y="Conteo",
+                color="Churn",
+                barmode="stack",
+                color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"}
+            )
+            fig_demo.update_layout(height=350)
+            st.plotly_chart(fig_demo, use_container_width=True)
+
+        with tab_servicios:
+            st.subheader("Impacto de la Oferta Comercial y Conectividad")
+            
+            col_serv1, col_serv2 = st.columns(2)
+            
+            with col_serv1:
+                st.write("##### Riesgo por Tipo de Servicio de Internet")
+                df_internet = df.groupby(["InternetService", "Churn"]).size().reset_index(name="Total")
+                fig_net = px.bar(
+                    df_internet,
+                    y="InternetService",
+                    x="Total",
+                    color="Churn",
+                    orientation="h",
+                    barmode="group",
+                    color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
+                    labels={"InternetService": "Tecnologia", "Total": "Clientes registrados"}
+                )
+                fig_net.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=300)
+                st.plotly_chart(fig_net, use_container_width=True)
+                
+            with col_serv2:
+                st.write("##### Impacto del Soporte Tecnico (TechSupport)")
+                df_support = df.groupby(["TechSupport", "Churn"]).size().reset_index(name="Total")
+                fig_sup = px.bar(
+                    df_support,
+                    x="TechSupport",
+                    y="Total",
+                    color="Churn",
+                    barmode="group",
+                    color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"}
+                )
+                fig_sup.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=300)
+                st.plotly_chart(fig_sup, use_container_width=True)
+
+            st.write("""
+            **Insight Comercial Detectado:** Los clientes que cuentan con servicio de Internet por Fibra Optica y aquellos que No tienen Soporte Tecnico contratado muestran proporciones de desercion significativamente mas elevadas en comparacion con el promedio del portafolio.
+            """)
+
+        with tab_financiero:
+            st.subheader("Analisis Estadistico de Cargos y Permanencia")
+            
+            metric_fin = st.radio(
+                "Seleccione la metrica financiera cuantitativa a evaluar (Histograma de Densidad):",
+                ["MonthlyCharges", "TotalCharges", "tenure"],
+                horizontal=True
+            )
+            
+            fig_hist = px.histogram(
+                df,
+                x=metric_fin,
+                color="Churn",
+                marginal="box",
+                barmode="overlay",
+                color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
+                labels={"MonthlyCharges": "Cargos Mensuales ($)", "TotalCharges": "Cargos Totales ($)", "tenure": "Meses de Permanencia (Tenure)"}
+            )
+            fig_hist.update_layout(height=450, yaxis_title="Densidad de Observaciones")
+            st.plotly_chart(fig_hist, use_container_width=True)
+            
+            st.write("##### Resumen Estadistico Descriptivo Matriz Financiera (Pandas describe)")
+            st.dataframe(
+                df[["tenure", "MonthlyCharges", "TotalCharges"]].describe().T, 
+                use_container_width=True
+            )
 
 # ==========================================
 # MODULO 4: GESTION DE REPORTES (POO)
 # ==========================================
 elif seccion == "Modulo 4: Gestion de Reportes (POO)":
-    st.title("Suite Institucional: Reporte de Auditoria y Control Estrat¨¦gico (EDA Minimo 10 Items)")
+    st.title("Suite Institucional: Reporte de Auditoria y Control Estrategico (EDA Minimo 10 Items)")
     st.divider()
 
     if st.session_state.df_churn is None:
         st.warning("Operacion Bloqueada: Suba la matriz de informacion en el Modulo 2 para instanciar el analizador POO.")
     else:
         df_activo = st.session_state.df_churn
-        # Instanciacion obligatoria de la clase analitica (POO)
         procesador = DataAnalyzer(df_activo)
         clasificacion = procesador.clasificar_variables_personalizada()
 
-        # Menu interno estructurado por tabs para albergar organizadamente los 10 items
         t_estructura, t_univariado, t_bivariado, t_dinamico_conclusiones = st.tabs([
             "Items 1-4: Estructura y Tipos", 
             "Items 5-6: Analisis Univariado", 
@@ -244,13 +393,10 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
             "Items 9-10: Suite Dinamica & Cierre"
         ])
 
-        # ---------------------------------------------------------------------
-        # TAB 1: ESTRUCTURA INICIAL Y VALIDACIONES BASICAS
-        # ---------------------------------------------------------------------
+        # --- TAB 1: ESTRUCTURA INICIAL Y VALIDACIONES BASICAS ---
         with t_estructura:
             st.header("Seccion A: Arquitectura y Validacion Estructural de la Matriz")
             
-            # Item 1: Informacion General del Dataset
             st.subheader("Item 1: Informacion General del Dataset (.info())")
             col_i1, col_i2 = st.columns([2, 1])
             with col_i1:
@@ -264,10 +410,8 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            # Item 2: Clasificacion de Variables via Funcion Personalizada
             st.subheader("Item 2: Clasificacion Estricta de Variables (POO Mapping)")
             st.write("Resultados computados mediante el motor iterativo de la clase `DataAnalyzer`:")
-            
             col_cl1, col_cl2 = st.columns(2)
             with col_cl1:
                 st.info(f"**Variables Categoricas Detectadas ({len(clasificacion['Categorica'])})**")
@@ -278,9 +422,8 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            # Item 3: Estadisticas Descriptivas
             st.subheader("Item 3: Matriz de Estadisticas Descriptivas Completas")
-            st.write("Fusi¨®n del metodo `.describe()` sumado al calculo de la **Moda** por columna:")
+            st.write("Fusion del metodo `.describe()` sumado al calculo de la **Moda** por columna:")
             df_descriptivos = procesador.calcular_descriptivos(clasificacion["Numerica"])
             st.dataframe(df_descriptivos, use_container_width=True)
             
@@ -291,7 +434,6 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            # Item 4: Analisis Estadistico de Valores Faltantes
             st.subheader("Item 4: Diagnostico de Integridad y Valores Faltantes (NaN)")
             conteo_nulos = df_activo.isnull().sum().reset_index()
             conteo_nulos.columns = ["Atributo", "Cantidad de Valores Nulos Detectados"]
@@ -306,13 +448,10 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
                 Durante la fase de ingesta (Modulo 2), se aplico una coercion forzada transmutandolos a `0.0`. Gracias a esta estrategia preventiva, la matriz arroja un **0.0% de registros nulos**, garantizando la convergencia aritmetica del codigo.
                 """)
 
-        # ---------------------------------------------------------------------
-        # TAB 2: ANALISIS UNIVARIADO (DISTRIBUCIONES INDEPENDIENTES)
-        # ---------------------------------------------------------------------
+        # --- TAB 2: ANALISIS UNIVARIADO (DISTRIBUCIONES INDEPENDIENTES) ---
         with t_univariado:
             st.header("Seccion B: Comportamiento Individual de Variables (Univariado)")
             
-            # Item 5: Distribucion de Variables Numericas
             st.subheader("Item 5: Distribucion de Variables Numericas (Histogramas & Densidad)")
             sel_num = st.selectbox("Seleccione la variable cuantitativa a graficar:", clasificacion["Numerica"])
             
@@ -321,8 +460,8 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
                 fig_h = procesador.graficar_histograma(sel_num)
                 st.pyplot(fig_h)
             with col_h2:
-                st.write("**Interpretacion Visual de la Forma de Distribuci¨®n:**")
-                if sel_num == "ten import tenure":
+                st.write("**Interpretacion Visual de la Forma de Distribucion:**")
+                if sel_num == "tenure":
                     st.write("La distribucion es marcadamente bimodal, con picos extremos en los meses iniciales (1-5 meses) y en el limite superior del ciclo de vida (70-72 meses).")
                 elif sel_num == "MonthlyCharges":
                     st.write("Se observa una alta densidad de clientes concentrados en la tarifa basica ($20), seguido por una distribucion uniforme distribuida entre los $70 y $100 mensuales.")
@@ -331,7 +470,6 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            # Item 6: Analisis de Variables Categoricas
             st.subheader("Item 6: Analisis de Variables Categoricas (Frecuencias Absolutas)")
             sel_cat = st.selectbox("Seleccione la variable cualitativa para analisis de proporciones:", ["Contract", "InternetService", "PaymentMethod", "PaperlessBilling"])
             
@@ -346,13 +484,10 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
                 df_prop["Proporcion Relativa"] = df_prop["Proporcion Relativa"].map(lambda x: f"{x*100:.2f}%")
                 st.dataframe(df_prop, use_container_width=True, hide_index=True)
 
-        # ---------------------------------------------------------------------
-        # TAB 3: CRUCES BIVARIADOS CONTRA LA VARIABLE OBJETIVO (CHURN)
-        # ---------------------------------------------------------------------
+        # --- TAB 3: CRUCES BIVARIADOS CONTRA LA VARIABLE OBJETIVO (CHURN) ---
         with t_bivariado:
             st.header("Seccion C: Analisis de Relaciones Dinamicas (Cruces Bivariados)")
             
-            # Item 7: Analisis Bivariado (Numerico vs Categorico)
             st.subheader("Item 7: Variacion Cuantitativa vs Abandono (Numerico vs Categorico)")
             sel_biv_num = st.radio("Elija la metrica cuantitativa para contrastar la fuga:", clasificacion["Numerica"], horizontal=True)
             
@@ -371,7 +506,6 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            # Item 8: Analisis Bivariado (Categorico vs Categorico)
             st.subheader("Item 8: Analisis Bivariado Estructural (Categorico vs Categorico)")
             sel_biv_cat = st.selectbox("Seleccione el atributo operativo para evaluar con Churn:", ["Contract", "InternetService", "PaymentMethod"])
             
@@ -383,13 +517,10 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
                 st.write("**Analisis de Vulnerabilidad Comercial:**")
                 st.write(f"Al cruzar `{sel_biv_cat}` con la tasa de perdida, queda demostrado visualmente que ciertos atributos actuan como detonantes de insatisfaccion o comodidad contractual. Los contratos mensuales (`Month-to-month`) y los pagos por transferencia fisica electronica lideran el volumen absoluto de abandonos.")
 
-        # ---------------------------------------------------------------------
-        # TAB 4: FILTROS MULTIPLES Y CONCLUSIONES DE NEGOCIO
-        # ---------------------------------------------------------------------
+        # --- TAB 4: FILTROS MULTIPLES Y CONCLUSIONES DE NEGOCIO ---
         with t_dinamico_conclusiones:
             st.header("Seccion D: Herramienta Parametrica y Cierre de Auditoria")
             
-            # Item 9: Analisis Basado en Parametros Seleccionados (Widgets Combinados)
             st.subheader("Item 9: Explorador Dinamico Basado en Parametros Seleccionados")
             st.write("Filtre la matriz operativa en tiempo real utilizando multiples criterios simultaneos:")
             
@@ -401,7 +532,6 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
             
             activar_filtro_antiguedad = st.checkbox("Restringir analisis a clientes de alto riesgo (Permanencia menor a 12 meses)")
             
-            # Algoritmo de filtrado reactivo con Pandas
             df_filtrado = df_activo[(df_activo["Contract"].isin(lista_contratos)) & (df_activo["PaymentMethod"].isin(lista_metodos))]
             if activar_filtro_antiguedad:
                 df_filtrado = df_filtrado[df_filtrado["tenure"] <= 12]
@@ -411,12 +541,9 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            # Item 10: Hallazgos Clave
             st.subheader("Item 10: Sintesis Visual de Hallazgos Clave (EDA Summary)")
-            
             col_hcl1, col_hcl2 = st.columns([2, 1])
             with col_hcl1:
-                # Grafico cientifico definitivo: Correlacion Cruzada tenure vs MonthlyCharges por Churn
                 fig_scat, ax_scat = plt.subplots(figsize=(6, 3.8))
                 sns.scatterplot(data=df_activo, x="tenure", y="MonthlyCharges", hue="Churn", alpha=0.4, ax=ax_scat, palette={"No": "#1f77b4", "Yes": "#d62728"})
                 ax_scat.set_title("Frontera Comercial de Riesgo: Tenure vs Cargos Mensuales", fontsize=10)
@@ -432,14 +559,12 @@ elif seccion == "Modulo 4: Gestion de Reportes (POO)":
 
             st.divider()
 
-            # CONCLUSIONES FINALES
-            st.header("Conclusiones Finales: Lineamientos Estrat¨¦gicos para la Toma de Decisiones")
-            
+            st.header("Conclusiones Finales: Lineamientos Estrategicos para la Toma de Decisiones")
             with st.container(border=True):
                 st.markdown("""
                 1. **Vulnerabilidad Contractual Aguda:** El contrato de ciclo mensual (`Month-to-month`) representa la mayor pasarela de fuga de la compa?ia. Las decisiones de retencion deben orientarse a incentivar activamente la migracion hacia esquemas anuales mediante bonificaciones en los meses de entrada.
                 2. **Factor de Alarma Financiera:** Los clientes que cancelaron sus servicios presentan costos mensuales medianos sustancialmente mas elevados. Es critico reevaluar la estrategia de precios de los paquetes empaquetados, dado que las tarifas altas estan expulsando a los consumidores nuevos.
-                3. **Deficiencia en Infraestructura Tecnologica:** El segmento de usuarios provisto con conectividad de **Fibra Optica** experimenta tasas de abandono anormalmente altas. Esto sugiere la existencia de un problema operativo latente en la calidad de la se?al o insatisfaccion con el ancho de banda ofrecido, requiriendo auditoria tecnica inmediata.
-                4. **Efecto Mitigador del Soporte Tecnico:** El analisis descriptivo confirmo que los clientes que no tienen contratado el servicio de asistencia tecnica o soporte digital se marchan en mayor proporcion. Empaquetar el soporte de manera gratuita durante los primeros 6 meses reducira dr¨¢sticamente la friccion inicial.
-                5. **Foco en el Ciclo de Vida Temprano:** La moda estad¨ªstica de abandono situada en el **mes 1** diagnostica que el proceso de induccion o bienvenida comercial esta fallando. Las decisiones corporativas deben priorizar programas de seguimiento y fidelizaci¨®n intensiva durante el primer trimestre de vida del cliente, dejando de lado las politicas de retencion reactiva.
+                3. **Deficiencia en Infraestructura Tecnologica:** El segmento de usuarios provisto con conectividad de **Fibra Optica** experimenta tasas de abandono anormalmente altas. Esto sugiere la existencia de un problema operativo latente en la calidad de la se?al o insatisfaccion con el ancho de banda profesional ofrecido, requiriendo auditoria tecnica inmediata.
+                4. **Efecto Mitigador del Soporte Tecnico:** El analisis descriptivo confirmo que los clientes que no tienen contratado el servicio de asistencia tecnica o soporte digital se marchan en mayor proporcion. Empaquetar el soporte de manera gratuita durante los primeros 6 meses reducira drasticamente la friccion inicial.
+                5. **Foco en el Ciclo de Vida Temprano:** La moda estadistica de abandono situada en el **mes 1** diagnostica que el proceso de induccion o bienvenida comercial esta fallando. Las decisiones corporativas deben priorizar programas de seguimiento y fidelizacion intensiva durante el primer trimestre de vida del cliente, dejando de lado las politicas de retencion reactiva.
                 """)
