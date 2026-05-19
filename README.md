@@ -45,16 +45,12 @@ A traves de un procesamiento con Pandas y NumPy, y la implementacion de Programa
 
 1. Clonar el repositorio:
    ```bash
-   git clone [https://github.com/BillLopez/sistema-febreo-python.git](https://github.com/BillLopez/sistema-febreo-python.git)
+   git clone [[https://github.com/BillLopez/Telco-Churn-Analytics.git](https://github.com/BillLopez/sistema-febreo-python](https://github.com/BillLopez/Telco-Churn-Analytics.git)
 Instalar el entorno de dependencias requerido:
 
-Bash
-pip install -r requirements.txt
-Lanzar la aplicacion desde la arquitectura de Streamlit:
+* pip install -r requirements.txt
+* Lanzar la aplicacion desde la arquitectura de Streamlit:
+* streamlit run app.py
 
-Bash
-streamlit run app.py
-Links Relevantes
-Repositorio de Codigo Fuente: GitHub - sistema-febreo-python
 
 Aplicacion Web Desplegada: Streamlit Cloud - Telco Churn Analytics
