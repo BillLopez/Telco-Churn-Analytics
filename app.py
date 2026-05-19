@@ -1,7 +1,11 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.express as px
 
+# ==========================================
+# CONFIGURACION DE LA SUITE ANALITICA
+# ==========================================
 st.set_page_config(
     page_title="Telco Churn Analytics - Dashboard",
     page_icon="",
@@ -29,7 +33,7 @@ with st.sidebar:
     st.caption("Anio: 2026")
 
 # ==========================================
-# MODULO 1: HOME 
+# MODULO 1: HOME
 # ==========================================
 if seccion == "Modulo 1: Home":
     st.title("Telecom Customer Churn Analytics: Strategic Retention Dashboard")
@@ -109,7 +113,7 @@ elif seccion == "Modulo 2: Carga de Datos":
             df_crudo['TotalCharges'] = df_crudo['TotalCharges'].fillna(0.0)
             df_crudo['SeniorCitizen'] = df_crudo['SeniorCitizen'].map({1: 'Yes', 0: 'No'})
             st.session_state.df_churn = df_crudo
-            st.toast("Dataset cargado y procesado con exito", icon="")
+            st.toast("Dataset cargado y processedo con exito")
 
         df = st.session_state.df_churn
         st.success("?Estructura de datos lista para el analisis!")
@@ -153,3 +157,147 @@ elif seccion == "Modulo 2: Carga de Datos":
 
     else:
         st.info("Por favor, cargue el archivo del caso de estudio (TelcoCustomerChurn.csv) para activar las herramientas de diagnostico.")
+
+# ==========================================
+# MODULO 3: ANALISIS EXPLORATORIO (EDA)
+# ==========================================
+elif seccion == "Modulo 3: Analisis Exploratorio (EDA)":
+    st.title("Analisis Exploratorio de Datos (EDA) Interactivo")
+    st.divider()
+
+    if st.session_state.df_churn is None:
+        st.warning("Por favor, vaya primero al Modulo 2: Carga de Datos y suba el archivo CSV para activar los analisis visuales.")
+    
+    else:
+        df = st.session_state.df_churn
+
+        st.write("""
+        Bienvenido al nucleo analitico del sistema. Explore las diferentes dimensiones operativas y 
+        financieras de la compa?ia para identificar que perfiles de clientes presentan la mayor tasa 
+        de cancelacion de servicios.
+        """)
+
+        tab_general, tab_servicios, tab_financiero = st.tabs([
+            "Distribucion General", 
+            "Analisis de Servicios", 
+            "Comportamiento Financiero"
+        ])
+
+        with tab_general:
+            st.subheader("Perfil de Abandono General y Demografico")
+            
+            col_gen1, col_gen2 = st.columns(2)
+            
+            with col_gen1:
+                st.write("##### Proporcion General de Fuga (Churn)")
+                df_churn_cnt = df["Churn"].value_counts().reset_index()
+                df_churn_cnt.columns = ["Estado", "Total"]
+                
+                fig_pie = px.pie(
+                    df_churn_cnt, 
+                    names="Estado", 
+                    values="Total",
+                    color="Estado",
+                    color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
+                    hole=0.4
+                )
+                fig_pie.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=300)
+                st.plotly_chart(fig_pie, use_container_width=True)
+                
+            with col_gen2:
+                st.write("##### Tasa de Fuga Segun Tipo de Contrato")
+                df_contract = df.groupby(["Contract", "Churn"]).size().reset_index(name="Clientes")
+                
+                fig_contract = px.bar(
+                    df_contract, 
+                    x="Contract", 
+                    y="Clientes", 
+                    color="Churn",
+                    barmode="group",
+                    color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
+                    labels={"Contract": "Tipo de Contrato", "Clientes": "Numero de Clientes"}
+                )
+                fig_contract.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=300)
+                st.plotly_chart(fig_contract, use_container_width=True)
+
+            st.divider()
+            st.write("##### Factores Demograficos Relacionados al Churn")
+            var_demo = st.selectbox("Seleccione una variable demografica para cruzar con Churn:", ["SeniorCitizen", "Partner", "Dependents", "gender"])
+            
+            df_demo_grp = df.groupby([var_demo, "Churn"]).size().reset_index(name="Conteo")
+            fig_demo = px.bar(
+                df_demo_grp,
+                x=var_demo,
+                y="Conteo",
+                color="Churn",
+                barmode="stack",
+                color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"}
+            )
+            fig_demo.update_layout(height=350)
+            st.plotly_chart(fig_demo, use_container_width=True)
+
+        with tab_servicios:
+            st.subheader("Impacto de la Oferta Comercial y Conectividad")
+            
+            col_serv1, col_serv2 = st.columns(2)
+            
+            with col_serv1:
+                st.write("##### Riesgo por Tipo de Servicio de Internet")
+                df_internet = df.groupby(["InternetService", "Churn"]).size().reset_index(name="Total")
+                fig_net = px.bar(
+                    df_internet,
+                    y="InternetService",
+                    x="Total",
+                    color="Churn",
+                    orientation="h",
+                    barmode="group",
+                    color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
+                    labels={"InternetService": "Tecnologia", "Total": "Clientes registrados"}
+                )
+                fig_net.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=300)
+                st.plotly_chart(fig_net, use_container_width=True)
+                
+            with col_serv2:
+                st.write("##### Impacto del Soporte Tecnico (TechSupport)")
+                df_support = df.groupby(["TechSupport", "Churn"]).size().reset_index(name="Total")
+                fig_sup = px.bar(
+                    df_support,
+                    x="TechSupport",
+                    y="Total",
+                    color="Churn",
+                    barmode="group",
+                    color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"}
+                )
+                fig_sup.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=300)
+                st.plotly_chart(fig_sup, use_container_width=True)
+
+            st.write("""
+            **Insight Comercial Detectado:** Los clientes que cuentan con servicio de Internet por Fibra Optica y aquellos que No tienen Soporte Tecnico contratado muestran proporciones de desercion significativamente mas elevadas en comparacion con el promedio del portafolio.
+            """)
+
+        with tab_financiero:
+            st.subheader("Analisis Estadistico de Cargos y Permanencia")
+            
+            metric_fin = st.radio(
+                "Seleccione la metrica financiera cuantitativa a evaluar (Histograma de Densidad):",
+                ["MonthlyCharges", "TotalCharges", "tenure"],
+                horizontal=True
+            )
+            
+            fig_hist = px.histogram(
+                df,
+                x=metric_fin,
+                color="Churn",
+                marginal="box",
+                barmode="overlay",
+                color_discrete_map={"No": "#1f77b4", "Yes": "#d62728"},
+                labels={"MonthlyCharges": "Cargos Mensuales ($)", "TotalCharges": "Cargos Totales ($)", "tenure": "Meses de Permanencia (Tenure)"}
+            )
+            fig_hist.update_layout(height=450, yaxis_title="Densidad de Observaciones")
+            st.plotly_chart(fig_hist, use_container_width=True)
+            
+            st.write("##### Resumen Estadistico Descriptivo Matriz Financiera (Pandas describe)")
+            st.dataframe(
+                df[["tenure", "MonthlyCharges", "TotalCharges"]].describe().T, 
+                use_container_width=True
+            )
